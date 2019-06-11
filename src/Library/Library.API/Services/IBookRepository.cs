@@ -13,6 +13,8 @@ namespace Library.API.Services
 
         void AddBook(Book bookToAdd);
 
+        Task AddBookForAuthorAsync(Guid authorId, Book book);
+
         Task<bool> SaveChangesAsync();
     }
 }

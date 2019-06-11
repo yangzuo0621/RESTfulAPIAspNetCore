@@ -58,6 +58,16 @@ namespace Library.API.Services
             _context.Add(bookToAdd);
         }
 
+        public async Task AddBookForAuthorAsync(Guid authorId, Book book)
+        {
+            var author = await _context.Authors.FirstOrDefaultAsync(a => a.Id == authorId);
+            if (book.Id == Guid.Empty)
+            {
+                book.Id = Guid.NewGuid();
+            }
+            author.Books.Add(book);
+        }
+
         public async Task<bool> SaveChangesAsync()
         {
             // return true if 1 or more entities were changed
