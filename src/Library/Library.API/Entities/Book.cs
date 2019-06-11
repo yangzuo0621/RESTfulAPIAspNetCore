@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Library.API.Entities
 {
@@ -14,16 +11,15 @@ namespace Library.API.Entities
         public Guid Id { get; set; }
 
         [Required]
-        [MaxLength(150)]
+        [MaxLength(100)]
         public string Title { get; set; }
 
-        [MaxLength(2500)]
+        [MaxLength(500)]
         public string Description { get; set; }
 
-        public int? AmountOfPages { get; set; }
+        [ForeignKey("AuthorId")]
+        public Author Author { get; set; }
 
         public Guid AuthorId { get; set; }
-
-        public Author Author { get; set; }
     }
 }

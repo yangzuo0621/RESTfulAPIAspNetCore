@@ -12,12 +12,19 @@ namespace Library.API.Entities
         public Guid Id { get; set; }
 
         [Required]
-        [MaxLength(150)]
+        [MaxLength(50)]
         public string FirstName { get; set; }
 
         [Required]
-        [MaxLength(150)]
+        [MaxLength(50)]
         public string LastName { get; set; }
+
+        [Required]
+        public DateTimeOffset DateOfBirth { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string Genre { get; set; }
 
         public ICollection<Book> Books { get; set; } = new List<Book>();
     }
