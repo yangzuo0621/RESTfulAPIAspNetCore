@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using Library.API.Contexts;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +31,27 @@ namespace Library.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(options =>
+            {
+                options.ReturnHttpNotAcceptable = true;
+
+                //options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+
+                var jsonOutputFormatter = options.OutputFormatters
+                    .OfType<JsonOutputFormatter>().FirstOrDefault();
+
+                if (jsonOutputFormatter != null)
+                {
+                    // remove text/json as it isn't the approved media type
+                    // for working with JSON at API level
+                    if (jsonOutputFormatter.SupportedMediaTypes.Contains("text/json"))
+                    {
+                        jsonOutputFormatter.SupportedMediaTypes.Remove("text/json");
+                    }
+                }
+            })
+            .AddXmlDataContractSerializerFormatters()
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddDbContext<LibraryContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("LibraryDBConnectionString")));
@@ -57,7 +77,7 @@ namespace Library.API
                 {
                     appBuilder.Run(async context =>
                     {
-                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                         await context.Response.WriteAsync("An unexpected fault happened. Try again later.");
                     });
                 });
