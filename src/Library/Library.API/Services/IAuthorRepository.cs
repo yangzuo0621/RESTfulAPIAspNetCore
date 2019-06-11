@@ -13,6 +13,8 @@ namespace Library.API.Services
 
         Task<Author> GetAuthorAsync(Guid authorId);
 
+        Task AddAuthorAsync(Author author);
+
         void UpdateAuthor(Author author);
 
         Task<bool> SaveChangesAsync();

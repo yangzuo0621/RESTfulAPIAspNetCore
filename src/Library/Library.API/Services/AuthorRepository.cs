@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Library.API.Contexts;
 using Library.API.Entities;
@@ -34,6 +35,21 @@ namespace Library.API.Services
         public async Task<IEnumerable<Author>> GetAuthorsAsync()
         {
             return await _context.Authors.ToListAsync();
+        }
+
+        public async Task AddAuthorAsync(Author author)
+        {
+            author.Id = Guid.NewGuid();
+            await _context.Authors.AddAsync(author);
+
+            // the repository fills the id (instead of using identity columns)
+            if (author.Books.Any())
+            {
+                foreach (var book in author.Books)
+                {
+                    book.Id = Guid.NewGuid();
+                }
+            }
         }
 
         public async Task<bool> SaveChangesAsync()

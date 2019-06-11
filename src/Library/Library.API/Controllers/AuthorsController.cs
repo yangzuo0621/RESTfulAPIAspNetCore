@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using Library.API.Services;
 using Library.API.Models;
+using Library.API.Entities;
 
 namespace Library.API.Controllers
 {
@@ -29,7 +30,7 @@ namespace Library.API.Controllers
             return Ok(authors);
         }
 
-        [HttpGet("{authorId}")]
+        [HttpGet("{authorId}", Name = "GetAuthor")]
         public async Task<ActionResult<AuthorDto>> GetAuthor(Guid authorId)
         {
             var authorFromRepo = await _authorRepository.GetAuthorAsync(authorId);
@@ -39,6 +40,29 @@ namespace Library.API.Controllers
             }
 
             return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<AuthorDto>> CreateAuthor([FromBody] AuthorForCreationDto author)
+        {
+            if (author == null)
+            {
+                return BadRequest();
+            }
+
+            var authorEntity = _mapper.Map<Author>(author);
+
+            await _authorRepository.AddAuthorAsync(authorEntity);
+
+            if (!await _authorRepository.SaveChangesAsync())
+            {
+                throw new Exception("Creating an author failed on save.");
+                // return StatusCode(500, "A problem happened with handling your request.");
+            }
+
+            var authorToReturn = _mapper.Map<AuthorDto>(authorEntity);
+
+            return CreatedAtRoute("GetAuthor", new { authorId = authorToReturn.Id }, authorToReturn);
         }
     }
 }
