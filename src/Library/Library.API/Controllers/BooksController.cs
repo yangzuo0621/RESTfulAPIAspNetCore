@@ -108,5 +108,37 @@ namespace Library.API.Controllers
 
             return NoContent();
         }
+
+        [HttpPut("{bookId}")]
+        public async Task<ActionResult> UpdateBookForAuthor(
+            Guid authorId, Guid bookId, [FromBody] BookForUpdateDto book)
+        {
+            if (book == null)
+            {
+                return BadRequest();
+            }
+
+            if (!await _authorRepository.AuthorExistsAsync(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookForAuthorFromRepo = await _bookRepository.GetBookAsync(authorId, bookId);
+            if (bookForAuthorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            await _bookRepository.UpdateBookForAuthorAsync(bookForAuthorFromRepo);
+
+            _mapper.Map(book, bookForAuthorFromRepo);
+
+            if (!await _authorRepository.SaveChangesAsync())
+            {
+                throw new Exception($"Update book {bookId} for author {authorId} failed on save.");
+            }
+
+            return NoContent();
+        }
     }
 }

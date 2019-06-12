@@ -68,6 +68,11 @@ namespace Library.API.Services
             author.Books.Add(book);
         }
 
+        public Task UpdateBookForAuthorAsync(Book book)
+        {
+            return Task.CompletedTask;
+        }
+
         public void DeleteBook(Book book)
         {
             _context.Books.Remove(book);
