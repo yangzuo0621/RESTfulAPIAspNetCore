@@ -68,6 +68,11 @@ namespace Library.API.Services
             author.Books.Add(book);
         }
 
+        public void DeleteBook(Book book)
+        {
+            _context.Books.Remove(book);
+        }
+
         public async Task<bool> SaveChangesAsync()
         {
             // return true if 1 or more entities were changed

@@ -15,6 +15,8 @@ namespace Library.API.Services
 
         Task AddBookForAuthorAsync(Guid authorId, Book book);
 
+        void DeleteBook(Book book);
+
         Task<bool> SaveChangesAsync();
     }
 }

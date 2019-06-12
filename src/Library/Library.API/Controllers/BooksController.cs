@@ -84,5 +84,29 @@ namespace Library.API.Controllers
                 new { authorId = authorId, bookId = bookToReturn.Id },
                 bookToReturn);
         }
+
+        [HttpDelete("{bookId}")]
+        public async Task<IActionResult> DeleteBookForAuthorAsync(Guid authorId, Guid bookId)
+        {
+            if (!await _authorRepository.AuthorExistsAsync(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookForAuthorFromRepo = await _bookRepository.GetBookAsync(authorId, bookId);
+            if (bookForAuthorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            _bookRepository.DeleteBook(bookForAuthorFromRepo);
+
+            if (!await _bookRepository.SaveChangesAsync())
+            {
+                throw new Exception($"Deleting book {bookId} for author {authorId} failed on save.");
+            }
+
+            return NoContent();
+        }
     }
 }
