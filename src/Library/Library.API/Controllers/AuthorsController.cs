@@ -6,6 +6,7 @@ using AutoMapper;
 using Library.API.Services;
 using Library.API.Models;
 using Library.API.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Library.API.Controllers
 {
@@ -63,6 +64,17 @@ namespace Library.API.Controllers
             var authorToReturn = _mapper.Map<AuthorDto>(authorEntity);
 
             return CreatedAtRoute("GetAuthor", new { authorId = authorToReturn.Id }, authorToReturn);
+        }
+
+        [HttpPost("{id}")]
+        public async Task<IActionResult> BlockAuthorCreation(Guid id)
+        {
+            if (await _authorRepository.AuthorExistsAsync(id))
+            {
+                return new StatusCodeResult(StatusCodes.Status409Conflict);
+            }
+
+            return NotFound();
         }
     }
 }
