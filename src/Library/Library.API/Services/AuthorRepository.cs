@@ -37,6 +37,14 @@ namespace Library.API.Services
             return await _context.Authors.ToListAsync();
         }
 
+        public async Task<IEnumerable<Author>> GetAuthorsAsync(IEnumerable<Guid> authorIds)
+        {
+            return await _context.Authors.Where(a => authorIds.Contains(a.Id))
+                .OrderBy(a => a.FirstName)
+                .OrderBy(a => a.LastName)
+                .ToListAsync();
+        }
+
         public async Task AddAuthorAsync(Author author)
         {
             author.Id = Guid.NewGuid();

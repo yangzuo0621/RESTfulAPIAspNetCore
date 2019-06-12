@@ -11,6 +11,8 @@ namespace Library.API.Services
 
         Task<IEnumerable<Author>> GetAuthorsAsync();
 
+        Task<IEnumerable<Author>> GetAuthorsAsync(IEnumerable<Guid> authorIds);
+
         Task<Author> GetAuthorAsync(Guid authorId);
 
         Task AddAuthorAsync(Author author);
