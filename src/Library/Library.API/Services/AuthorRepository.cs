@@ -60,6 +60,11 @@ namespace Library.API.Services
             }
         }
 
+        public void DeleteAuthor(Author author)
+        {
+            _context.Authors.Remove(author);
+        }
+
         public async Task<bool> SaveChangesAsync()
         {
             // return true if 1 or more entities were changed

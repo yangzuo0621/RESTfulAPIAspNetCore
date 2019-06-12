@@ -76,5 +76,24 @@ namespace Library.API.Controllers
 
             return NotFound();
         }
+
+        [HttpDelete("{authorId}")]
+        public async Task<IActionResult> DeleteAuthor(Guid authorId)
+        {
+            var authorFromRepo = await _authorRepository.GetAuthorAsync(authorId);
+            if (authorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            _authorRepository.DeleteAuthor(authorFromRepo);
+
+            if (!await _authorRepository.SaveChangesAsync())
+            {
+                throw new Exception($"Deleting author {authorId} failed on save.");
+            }
+
+            return NoContent();
+        }
     }
 }

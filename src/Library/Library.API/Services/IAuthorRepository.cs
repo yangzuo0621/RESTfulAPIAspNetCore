@@ -19,6 +19,8 @@ namespace Library.API.Services
 
         void UpdateAuthor(Author author);
 
+        void DeleteAuthor(Author author);
+
         Task<bool> SaveChangesAsync();
     }
 }
