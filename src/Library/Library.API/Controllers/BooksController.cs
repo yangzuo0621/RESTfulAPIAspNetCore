@@ -1,7 +1,7 @@
 ﻿using System;
-using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using Library.API.Services;
 using Library.API.Models;
@@ -13,41 +13,36 @@ namespace Library.API.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        public readonly IBookRepository _bookRepository;
-        public readonly IAuthorRepository _authorRepository;
+        public readonly ILibraryRepository _libraryRepository;
         public readonly IMapper _mapper;
 
-        public BooksController(
-            IBookRepository bookRepository,
-            IAuthorRepository authorRepository,
-            IMapper mapper)
+        public BooksController(ILibraryRepository libraryRepository, IMapper mapper)
         {
-            _bookRepository = bookRepository;
-            _authorRepository = authorRepository;
+            _libraryRepository = libraryRepository;
             _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooksForAuthorAsync(Guid authorId)
         {
-            if (!await _authorRepository.AuthorExistsAsync(authorId))
+            if (!await _libraryRepository.AuthorExistsAsync(authorId))
             {
                 return NotFound();
             }
 
-            var booksFromRepo = await _bookRepository.GetBooksAsync(authorId);
+            var booksFromRepo = await _libraryRepository.GetBooksForAuthorAsync(authorId);
             return Ok(_mapper.Map<IEnumerable<BookDto>>(booksFromRepo));
         }
 
         [HttpGet("{bookId}", Name = "GetBookForAuthor")]
         public async Task<ActionResult<BookDto>> GetBookForAuthorAsync(Guid authorId, Guid bookId)
         {
-            if (!await _authorRepository.AuthorExistsAsync(authorId))
+            if (!await _libraryRepository.AuthorExistsAsync(authorId))
             {
                 return NotFound();
             }
 
-            var bookForAuthorFromRepo = await _bookRepository.GetBookAsync(authorId, bookId);
+            var bookForAuthorFromRepo = await _libraryRepository.GetBookForAuthorAsync(authorId, bookId);
             if (bookForAuthorFromRepo == null)
             {
                 return NotFound();
@@ -64,15 +59,15 @@ namespace Library.API.Controllers
                 return BadRequest();
             }
 
-            if (!await _authorRepository.AuthorExistsAsync(authorId))
+            if (!await _libraryRepository.AuthorExistsAsync(authorId))
             {
                 return NotFound();
             }
 
             var bookEntity = _mapper.Map<Book>(book);
-            await _bookRepository.AddBookForAuthorAsync(authorId, bookEntity);
+            await _libraryRepository.AddBookForAuthorAsync(authorId, bookEntity);
 
-            if(!await _bookRepository.SaveChangesAsync())
+            if(!await _libraryRepository.SaveChangesAsync())
             {
                 throw new Exception($"Creating a book for author {authorId} failed on save.");
             }
@@ -88,20 +83,20 @@ namespace Library.API.Controllers
         [HttpDelete("{bookId}")]
         public async Task<IActionResult> DeleteBookForAuthorAsync(Guid authorId, Guid bookId)
         {
-            if (!await _authorRepository.AuthorExistsAsync(authorId))
+            if (!await _libraryRepository.AuthorExistsAsync(authorId))
             {
                 return NotFound();
             }
 
-            var bookForAuthorFromRepo = await _bookRepository.GetBookAsync(authorId, bookId);
+            var bookForAuthorFromRepo = await _libraryRepository.GetBookForAuthorAsync(authorId, bookId);
             if (bookForAuthorFromRepo == null)
             {
                 return NotFound();
             }
 
-            _bookRepository.DeleteBook(bookForAuthorFromRepo);
+            await _libraryRepository.DeleteBookAsync(bookForAuthorFromRepo);
 
-            if (!await _bookRepository.SaveChangesAsync())
+            if (!await _libraryRepository.SaveChangesAsync())
             {
                 throw new Exception($"Deleting book {bookId} for author {authorId} failed on save.");
             }
@@ -118,22 +113,22 @@ namespace Library.API.Controllers
                 return BadRequest();
             }
 
-            if (!await _authorRepository.AuthorExistsAsync(authorId))
+            if (!await _libraryRepository.AuthorExistsAsync(authorId))
             {
                 return NotFound();
             }
 
-            var bookForAuthorFromRepo = await _bookRepository.GetBookAsync(authorId, bookId);
+            var bookForAuthorFromRepo = await _libraryRepository.GetBookForAuthorAsync(authorId, bookId);
             if (bookForAuthorFromRepo == null)
             {
                 return NotFound();
             }
 
-            await _bookRepository.UpdateBookForAuthorAsync(bookForAuthorFromRepo);
+            await _libraryRepository.UpdateBookForAuthorAsync(bookForAuthorFromRepo);
 
             _mapper.Map(book, bookForAuthorFromRepo);
 
-            if (!await _authorRepository.SaveChangesAsync())
+            if (!await _libraryRepository.SaveChangesAsync())
             {
                 throw new Exception($"Update book {bookId} for author {authorId} failed on save.");
             }

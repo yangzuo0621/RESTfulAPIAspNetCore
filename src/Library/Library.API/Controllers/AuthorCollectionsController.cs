@@ -15,12 +15,12 @@ namespace Library.API.Controllers
     [ApiController]
     public class AuthorCollectionsController : ControllerBase
     {
-        private readonly IAuthorRepository _authorRepository;
+        private readonly ILibraryRepository _libraryRepository;
         private readonly IMapper _mapper;
 
-        public AuthorCollectionsController(IAuthorRepository authorRepository, IMapper mapper)
+        public AuthorCollectionsController(ILibraryRepository libraryRepository, IMapper mapper)
         {
-            _authorRepository = authorRepository;
+            _libraryRepository = libraryRepository;
             _mapper = mapper;
         }
 
@@ -37,10 +37,10 @@ namespace Library.API.Controllers
 
             foreach (var author in authorEntities)
             {
-                await _authorRepository.AddAuthorAsync(author);
+                await _libraryRepository.AddAuthorAsync(author);
             }
 
-            if (!await _authorRepository.SaveChangesAsync())
+            if (!await _libraryRepository.SaveChangesAsync())
             {
                 throw new Exception("Creating an author collection failed on save.");
             }
@@ -61,7 +61,7 @@ namespace Library.API.Controllers
                 return BadRequest();
             }
 
-            var authorEntities = await _authorRepository.GetAuthorsAsync(authorIds);
+            var authorEntities = await _libraryRepository.GetAuthorsAsync(authorIds);
 
             if (authorIds.Count() != authorEntities.Count())
             {

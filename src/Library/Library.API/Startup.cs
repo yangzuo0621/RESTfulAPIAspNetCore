@@ -59,8 +59,6 @@ namespace Library.API
             //    options.UseInMemoryDatabase("InMemoryDb"));
 
             services.AddScoped<ILibraryRepository, LibraryRepository>();
-            services.AddScoped<IAuthorRepository, AuthorRepository>();
-            services.AddScoped<IBookRepository, BookRepository>();
 
             services.AddAutoMapper(typeof(Startup).Assembly);
         }

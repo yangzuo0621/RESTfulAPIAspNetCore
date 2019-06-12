@@ -2,11 +2,11 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using AutoMapper;
 using Library.API.Services;
 using Library.API.Models;
 using Library.API.Entities;
-using Microsoft.AspNetCore.Http;
 
 namespace Library.API.Controllers
 {
@@ -14,19 +14,19 @@ namespace Library.API.Controllers
     [ApiController]
     public class AuthorsController : ControllerBase
     {
-        private readonly IAuthorRepository _authorRepository;
+        private readonly ILibraryRepository _libraryRepository;
         private readonly IMapper _mapper;
 
-        public AuthorsController(IAuthorRepository authorRepository, IMapper mapper)
+        public AuthorsController(ILibraryRepository libraryRepository, IMapper mapper)
         {
-            _authorRepository = authorRepository;
+            _libraryRepository = libraryRepository;
             _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthors()
         {
-            var authorsFromRepo = await _authorRepository.GetAuthorsAsync();
+            var authorsFromRepo = await _libraryRepository.GetAuthorsAsync();
             var authors = _mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);
             return Ok(authors);
         }
@@ -34,7 +34,7 @@ namespace Library.API.Controllers
         [HttpGet("{authorId}", Name = "GetAuthor")]
         public async Task<ActionResult<AuthorDto>> GetAuthor(Guid authorId)
         {
-            var authorFromRepo = await _authorRepository.GetAuthorAsync(authorId);
+            var authorFromRepo = await _libraryRepository.GetAuthorAsync(authorId);
             if (authorFromRepo == null)
             {
                 return NotFound();
@@ -53,9 +53,9 @@ namespace Library.API.Controllers
 
             var authorEntity = _mapper.Map<Author>(author);
 
-            await _authorRepository.AddAuthorAsync(authorEntity);
+            await _libraryRepository.AddAuthorAsync(authorEntity);
 
-            if (!await _authorRepository.SaveChangesAsync())
+            if (!await _libraryRepository.SaveChangesAsync())
             {
                 throw new Exception("Creating an author failed on save.");
                 // return StatusCode(500, "A problem happened with handling your request.");
@@ -69,7 +69,7 @@ namespace Library.API.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockAuthorCreation(Guid id)
         {
-            if (await _authorRepository.AuthorExistsAsync(id))
+            if (await _libraryRepository.AuthorExistsAsync(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -80,15 +80,15 @@ namespace Library.API.Controllers
         [HttpDelete("{authorId}")]
         public async Task<IActionResult> DeleteAuthor(Guid authorId)
         {
-            var authorFromRepo = await _authorRepository.GetAuthorAsync(authorId);
+            var authorFromRepo = await _libraryRepository.GetAuthorAsync(authorId);
             if (authorFromRepo == null)
             {
                 return NotFound();
             }
 
-            _authorRepository.DeleteAuthor(authorFromRepo);
+            await _libraryRepository.DeleteAuthorAsync(authorFromRepo);
 
-            if (!await _authorRepository.SaveChangesAsync())
+            if (!await _libraryRepository.SaveChangesAsync())
             {
                 throw new Exception($"Deleting author {authorId} failed on save.");
             }
