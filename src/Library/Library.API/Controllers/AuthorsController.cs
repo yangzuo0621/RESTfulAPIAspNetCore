@@ -24,7 +24,7 @@ namespace Library.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthors()
+        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthorsAsync()
         {
             var authorsFromRepo = await _libraryRepository.GetAuthorsAsync();
             var authors = _mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);
@@ -32,7 +32,7 @@ namespace Library.API.Controllers
         }
 
         [HttpGet("{authorId}", Name = "GetAuthor")]
-        public async Task<ActionResult<AuthorDto>> GetAuthor(Guid authorId)
+        public async Task<ActionResult<AuthorDto>> GetAuthorAsync(Guid authorId)
         {
             var authorFromRepo = await _libraryRepository.GetAuthorAsync(authorId);
             if (authorFromRepo == null)
@@ -44,7 +44,7 @@ namespace Library.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<AuthorDto>> CreateAuthor([FromBody] AuthorForCreationDto author)
+        public async Task<ActionResult<AuthorDto>> CreateAuthorAsync([FromBody] AuthorForCreationDto author)
         {
             if (author == null)
             {
@@ -67,7 +67,7 @@ namespace Library.API.Controllers
         }
 
         [HttpPost("{id}")]
-        public async Task<IActionResult> BlockAuthorCreation(Guid id)
+        public async Task<IActionResult> BlockAuthorCreationAsync(Guid id)
         {
             if (await _libraryRepository.AuthorExistsAsync(id))
             {
@@ -78,7 +78,7 @@ namespace Library.API.Controllers
         }
 
         [HttpDelete("{authorId}")]
-        public async Task<IActionResult> DeleteAuthor(Guid authorId)
+        public async Task<IActionResult> DeleteAuthorAsync(Guid authorId)
         {
             var authorFromRepo = await _libraryRepository.GetAuthorAsync(authorId);
             if (authorFromRepo == null)
