@@ -105,7 +105,7 @@ namespace Library.API.Controllers
         }
 
         [HttpPut("{bookId}")]
-        public async Task<ActionResult> UpdateBookForAuthor(
+        public async Task<ActionResult> UpdateBookForAuthorAsync(
             Guid authorId, Guid bookId, [FromBody] BookForUpdateDto book)
         {
             if (book == null)
