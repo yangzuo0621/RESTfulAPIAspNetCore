@@ -119,8 +119,27 @@ namespace Library.API.Controllers
             }
 
             var bookForAuthorFromRepo = await _libraryRepository.GetBookForAuthorAsync(authorId, bookId);
+
             if (bookForAuthorFromRepo == null)
             {
+                #region Upserting with HTTP PUT
+                //var bookToAdd = _mapper.Map<Book>(book);
+                //bookToAdd.Id = bookId;
+
+                //await _libraryRepository.AddBookForAuthorAsync(authorId, bookToAdd);
+
+                //if (!await _libraryRepository.SaveChangesAsync())
+                //{
+                //    throw new Exception($"Upserting book {bookId} for author {authorId} failed on save.");
+                //}
+
+                //var bookToReturn = _mapper.Map<BookDto>(bookToAdd);
+
+                //return CreatedAtRoute("GetBookForAuthor",
+                //    new { authorId = authorId, bookId = bookToReturn.Id },
+                //    bookToReturn);
+                #endregion
+
                 return NotFound();
             }
 
