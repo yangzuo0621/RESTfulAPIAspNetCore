@@ -189,10 +189,29 @@ namespace Library.API.Tests.UnitTests
         }
 
         [Fact]
+        public async Task CreateBookForAuthorAsync_Returns433StatusCode_Test()
+        {
+            // Arrange
+            var authorId = Guid.NewGuid();
+            var book = new BookForCreationDto { Title = "The same", Description = "The same" };
+            var mockRepo = new Mock<ILibraryRepository>();
+            var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
+            var controller = new BooksController(mockRepo.Object, mapper);
+
+            // Act 
+            var result = await controller.CreateBookForAuthorAsync(authorId, book);
+
+            // Assert
+            var actionResult = Assert.IsType<ActionResult<BookDto>>(result);
+            Assert.IsType<UnprocessableEntityObjectResult>(actionResult.Result);
+        }
+
+        [Fact]
         public async Task CreateBookForAuthorAsync_AuthorNotExist_Test()
         {
             // Arrange
             var authorId = Guid.NewGuid();
+            var book = new BookForCreationDto { Title = "The title", Description = "The description" };
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.AuthorExistsAsync(authorId))
                 .ReturnsAsync(false);
@@ -200,7 +219,7 @@ namespace Library.API.Tests.UnitTests
             var controller = new BooksController(mockRepo.Object, mapper);
 
             // Act 
-            var result = await controller.CreateBookForAuthorAsync(authorId, book: new BookForCreationDto());
+            var result = await controller.CreateBookForAuthorAsync(authorId, book);
 
             // Assert
             var actionResult = Assert.IsType<ActionResult<BookDto>>(result);
