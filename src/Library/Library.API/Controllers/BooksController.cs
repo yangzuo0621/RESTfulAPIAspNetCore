@@ -60,6 +60,8 @@ namespace Library.API.Controllers
                 return BadRequest();
             }
 
+            // As the [ApiController] attribute, the common validation is handled by it, such as model binding.
+            // So only custom validation is handled by this code
             if (book.Description == book.Title)
             {
                 ModelState.AddModelError(nameof(BookForCreationDto),

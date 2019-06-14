@@ -51,6 +51,17 @@ namespace Library.API
                 }
             })
             .AddXmlDataContractSerializerFormatters()
+            // Uncomment this code and use ConfigureApiBehaviorOptions to change the behavior of [ApiController] attribute.
+            //.ConfigureApiBehaviorOptions(options =>
+            //{
+            //    options.SuppressConsumesConstraintForFormFileParameters = true;
+            //    options.SuppressInferBindingSourcesForParameters = true;
+            //    options.SuppressModelStateInvalidFilter = true;
+            //    options.SuppressMapClientErrors = true;
+            //    options.SuppressUseValidationProblemDetailsForInvalidModelStateResponses = true;
+            //    options.ClientErrorMapping[404].Link =
+            //        "https://httpstatuses.com/404";
+            //})
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddDbContext<LibraryContext>(options =>
