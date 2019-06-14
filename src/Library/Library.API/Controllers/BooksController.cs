@@ -133,6 +133,18 @@ namespace Library.API.Controllers
                 return NotFound();
             }
 
+            if (book.Description == book.Title)
+            {
+                ModelState.AddModelError(nameof(BookForUpdateDto),
+                    "The provided description should be different from the title.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                // return 422
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var bookForAuthorFromRepo = await _libraryRepository.GetBookForAuthorAsync(authorId, bookId);
 
             if (bookForAuthorFromRepo == null)

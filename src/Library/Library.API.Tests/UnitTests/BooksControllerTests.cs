@@ -348,6 +348,7 @@ namespace Library.API.Tests.UnitTests
             // Arrange
             var authorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
             var bookId = Guid.Parse("1325360c-8253-473a-a20f-55c269c20407");
+            var bookForUpdateDto = new BookForUpdateDto { Title = "A Book Title", Description = "Some Description" };
             var book = GetTestAuthorsData().FirstOrDefault(a => a.Id == authorId)
                 .Books.FirstOrDefault(b => b.Id == bookId);
             var mockRepo = new Mock<ILibraryRepository>();
@@ -361,7 +362,6 @@ namespace Library.API.Tests.UnitTests
                 .ReturnsAsync(true);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
             var controller = new BooksController(mockRepo.Object, mapper);
-            var bookForUpdateDto = new BookForUpdateDto();
 
             // Act 
             var result = await controller.UpdateBookForAuthorAsync(authorId, bookId, bookForUpdateDto);
@@ -388,11 +388,32 @@ namespace Library.API.Tests.UnitTests
         }
 
         [Fact]
+        public async Task UpdateBookForAuthorAsync_Returns422StatusCode_Test()
+        {
+            // Arrange
+            var authorId = Guid.NewGuid();
+            var bookId = Guid.NewGuid();
+            var bookForUpdateDto = new BookForUpdateDto { Title = "The Same", Description = "The Same" };
+            var mockRepo = new Mock<ILibraryRepository>();
+            mockRepo.Setup(repo => repo.AuthorExistsAsync(authorId))
+                .ReturnsAsync(true);
+            var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
+            var controller = new BooksController(mockRepo.Object, mapper);
+
+            // Act 
+            var result = await controller.UpdateBookForAuthorAsync(authorId, bookId, bookForUpdateDto);
+
+            // Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(result);
+        }
+
+        [Fact]
         public async Task UpdateBookForAuthorAsync_AuthorNotExist_Test()
         {
             // Arrange
             var authorId = Guid.NewGuid();
             var bookId = Guid.NewGuid();
+            var bookForUpdateDto = new BookForUpdateDto { Title = "A Book Title", Description = "Some Description" };
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.AuthorExistsAsync(authorId))
                 .ReturnsAsync(false);
@@ -400,7 +421,7 @@ namespace Library.API.Tests.UnitTests
             var controller = new BooksController(mockRepo.Object, mapper);
 
             // Act 
-            var result = await controller.UpdateBookForAuthorAsync(authorId, bookId, book: new BookForUpdateDto());
+            var result = await controller.UpdateBookForAuthorAsync(authorId, bookId, bookForUpdateDto);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -412,6 +433,7 @@ namespace Library.API.Tests.UnitTests
             // Arrange
             var authorId = Guid.NewGuid();
             var bookId = Guid.NewGuid();
+            var bookForUpdateDto = new BookForUpdateDto { Title = "A Book Title", Description = "Some Description" };
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.AuthorExistsAsync(authorId))
                 .Returns(Task.FromResult(true));
@@ -421,7 +443,7 @@ namespace Library.API.Tests.UnitTests
             var controller = new BooksController(mockRepo.Object, mapper);
 
             // Act 
-            var result = await controller.UpdateBookForAuthorAsync(authorId, bookId, book: new BookForUpdateDto());
+            var result = await controller.UpdateBookForAuthorAsync(authorId, bookId, bookForUpdateDto);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -433,6 +455,7 @@ namespace Library.API.Tests.UnitTests
             // Arrange
             var authorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
             var bookId = Guid.Parse("1325360c-8253-473a-a20f-55c269c20407");
+            var bookForUpdateDto = new BookForUpdateDto { Title = "A Book Title", Description = "Some Description" };
             var book = GetTestAuthorsData().FirstOrDefault(a => a.Id == authorId)
                 .Books.FirstOrDefault(b => b.Id == bookId);
             var mockRepo = new Mock<ILibraryRepository>();
@@ -446,7 +469,6 @@ namespace Library.API.Tests.UnitTests
                 .ReturnsAsync(false);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
             var controller = new BooksController(mockRepo.Object, mapper);
-            var bookForUpdateDto = new BookForUpdateDto();
 
             // Act 
             var result = await Assert.ThrowsAsync<Exception>(() => controller.UpdateBookForAuthorAsync(authorId, bookId, bookForUpdateDto));

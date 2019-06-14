@@ -11,3 +11,5 @@ The [ApiController] attribute can be applied to a controller class to enable API
 + Problem details for error status codes
 
 To configure the behavior of the ApiController attribute, refer to [link](https://docs.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-2.2#problem-details-for-error-status-codes).
+
+[FluentValidation](https://github.com/JeremySkinner/FluentValidation) Tool can be used to build custom validation rules.
