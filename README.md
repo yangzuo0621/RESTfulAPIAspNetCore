@@ -14,8 +14,11 @@ This project comes from https://github.com/KevinDockx/DocumentingAspNetCoreApisW
 | HEAD        | -               | api/authors/{authorId} | - |
 | OPTIONS     | -               | api/...                | - |
 
-## Method Safety and Method Idempotency
++ HTTP `PUT` method is often used to fully update resource.
 
++ HTTP `PATCH` method is used to partially update resrouce. [JavaScript Object Notation (JSON) Patch](https://tools.ietf.org/html/rfc6902) is a standard to represent JSON Patch. Patch requests should be sent with media type of `applcation/json-patch+json`.
+
+## Method Safety and Method Idempotency
 
 | HTTP Method | Safe? | Idempotent? |
 | ----------- | :---: | :---------: |

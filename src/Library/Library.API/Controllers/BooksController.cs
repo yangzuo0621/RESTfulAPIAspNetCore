@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.JsonPatch;
 using AutoMapper;
 using Library.API.Services;
 using Library.API.Models;
@@ -67,7 +68,7 @@ namespace Library.API.Controllers
             var bookEntity = _mapper.Map<Book>(book);
             await _libraryRepository.AddBookForAuthorAsync(authorId, bookEntity);
 
-            if(!await _libraryRepository.SaveChangesAsync())
+            if (!await _libraryRepository.SaveChangesAsync())
             {
                 throw new Exception($"Creating a book for author {authorId} failed on save.");
             }
@@ -150,6 +151,44 @@ namespace Library.API.Controllers
             if (!await _libraryRepository.SaveChangesAsync())
             {
                 throw new Exception($"Update book {bookId} for author {authorId} failed on save.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpPatch("{bookId}")]
+        public async Task<IActionResult> PartiallyUpdateBookForAuthorAsync(
+            Guid authorId, Guid bookId, [FromBody] JsonPatchDocument<BookForUpdateDto> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                return BadRequest();
+            }
+
+            if (!await _libraryRepository.AuthorExistsAsync(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookForAuthorFromRepo = await _libraryRepository.GetBookForAuthorAsync(authorId, bookId);
+            if (bookForAuthorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var bookToPatch = _mapper.Map<BookForUpdateDto>(bookForAuthorFromRepo);
+
+            patchDoc.ApplyTo(bookToPatch);
+
+            // add validation
+
+            _mapper.Map(bookToPatch, bookForAuthorFromRepo);
+
+            await _libraryRepository.UpdateBookForAuthorAsync(bookForAuthorFromRepo);
+
+            if (!await _libraryRepository.SaveChangesAsync())
+            {
+                throw new Exception($"Patching book {bookId} for author {authorId} failed on save.");
             }
 
             return NoContent();

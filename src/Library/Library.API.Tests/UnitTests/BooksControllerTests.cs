@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.JsonPatch;
 using Xunit;
 using Moq;
 using AutoMapper;
@@ -38,7 +39,7 @@ namespace Library.API.Tests.UnitTests
             var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
             var returnBookDtos = Assert.IsAssignableFrom<IEnumerable<BookDto>>(okResult.Value);
             Assert.NotEmpty(returnBookDtos);
-            Assert.Collection(returnBookDtos, 
+            Assert.Collection(returnBookDtos,
                 item =>
                 {
                     Assert.Equal(new Guid("1325360c-8253-473a-a20f-55c269c20407"), item.Id);
@@ -433,6 +434,131 @@ namespace Library.API.Tests.UnitTests
 
             // Assert
             Assert.Equal($"Update book {bookId} for author {authorId} failed on save.", result.Message);
+        }
+        #endregion
+
+        #region [HttpPatch] PartiallyUpdateBookForAuthorAsync Test
+        [Fact]
+        public async Task PartiallyUpdateBookForAuthorAsync_Test()
+        {
+            // Arrange
+            var authorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
+            var bookId = Guid.Parse("1325360c-8253-473a-a20f-55c269c20407");
+            var patchDoc = new JsonPatchDocument<BookForUpdateDto>();
+            var book = GetTestAuthorsData().FirstOrDefault(a => a.Id == authorId)
+                .Books.FirstOrDefault(b => b.Id == bookId);
+            var mockRepo = new Mock<ILibraryRepository>();
+            mockRepo.Setup(repo => repo.AuthorExistsAsync(authorId))
+                .Returns(Task.FromResult(true));
+            mockRepo.Setup(repo => repo.GetBookForAuthorAsync(authorId, bookId))
+                .ReturnsAsync(book);
+            mockRepo.Setup(repo => repo.UpdateBookForAuthorAsync(book))
+                .Returns(Task.CompletedTask)
+                .Verifiable();
+            mockRepo.Setup(repo => repo.SaveChangesAsync())
+                .ReturnsAsync(true);
+            var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
+            var controller = new BooksController(mockRepo.Object, mapper);
+            var bookForUpdateDto = new BookForUpdateDto();
+
+            // Act 
+            var result = await controller.PartiallyUpdateBookForAuthorAsync(authorId, bookId, patchDoc);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            mockRepo.Verify();
+        }
+
+        [Fact]
+        public async Task PartiallyUpdateBookForAuthorAsync_ReturnsBadRequest_Test()
+        {
+            // Arrange
+            var authorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
+            var bookId = Guid.Parse("1325360c-8253-473a-a20f-55c269c20407");
+            var mockRepo = new Mock<ILibraryRepository>();
+            var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
+            var controller = new BooksController(mockRepo.Object, mapper);
+
+            // Act
+            var result = await controller.PartiallyUpdateBookForAuthorAsync(authorId, bookId, patchDoc:null);
+
+            // Assert
+            Assert.IsType<BadRequestResult>(result);
+        }
+
+        [Fact]
+        public async Task PartiallyUpdateBookForAuthorAsync_AuthorNotExist_Test()
+        {
+            // Arrange
+            var authorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
+            var bookId = Guid.Parse("1325360c-8253-473a-a20f-55c269c20407");
+            var patchDoc = new JsonPatchDocument<BookForUpdateDto>();
+            var mockRepo = new Mock<ILibraryRepository>();
+            mockRepo.Setup(repo => repo.AuthorExistsAsync(authorId))
+                .ReturnsAsync(false);
+            var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
+            var controller = new BooksController(mockRepo.Object, mapper);
+
+            // Act
+            var result = await controller.PartiallyUpdateBookForAuthorAsync(authorId, bookId, patchDoc);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task PartiallyUpdateBookForAuthorAsync_BookNotExist_Test()
+        {
+            // Arrange
+            var authorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
+            var bookId = Guid.Parse("1325360c-8253-473a-a20f-55c269c20407");
+            var patchDoc = new JsonPatchDocument<BookForUpdateDto>();
+            var mockRepo = new Mock<ILibraryRepository>();
+            mockRepo.Setup(repo => repo.AuthorExistsAsync(authorId))
+                .ReturnsAsync(true);
+            mockRepo.Setup(repo => repo.GetBookForAuthorAsync(authorId, bookId))
+                .ReturnsAsync((Book)null)
+                .Verifiable();
+            var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
+            var controller = new BooksController(mockRepo.Object, mapper);
+
+            // Act
+            var result = await controller.PartiallyUpdateBookForAuthorAsync(authorId, bookId, patchDoc);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+            mockRepo.Verify();
+        }
+
+        [Fact]
+        public async Task PartiallyUpdateBookForAuthorAsync_ThrowException_Test()
+        {
+            // Arrange
+            var authorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
+            var bookId = Guid.Parse("1325360c-8253-473a-a20f-55c269c20407");
+            var patchDoc = new JsonPatchDocument<BookForUpdateDto>();
+            var book = GetTestAuthorsData().FirstOrDefault(a => a.Id == authorId)
+                .Books.FirstOrDefault(b => b.Id == bookId);
+            var mockRepo = new Mock<ILibraryRepository>();
+            mockRepo.Setup(repo => repo.AuthorExistsAsync(authorId))
+                .Returns(Task.FromResult(true));
+            mockRepo.Setup(repo => repo.GetBookForAuthorAsync(authorId, bookId))
+                .ReturnsAsync(book);
+            mockRepo.Setup(repo => repo.UpdateBookForAuthorAsync(book))
+                .Returns(Task.CompletedTask)
+                .Verifiable();
+            mockRepo.Setup(repo => repo.SaveChangesAsync())
+                .ReturnsAsync(false);
+            var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
+            var controller = new BooksController(mockRepo.Object, mapper);
+            var bookForUpdateDto = new BookForUpdateDto();
+
+            // Act 
+            var result = await Assert.ThrowsAsync<Exception>(() => controller.PartiallyUpdateBookForAuthorAsync(authorId, bookId, patchDoc));
+
+            // Assert
+            Assert.Equal($"Patching book {bookId} for author {authorId} failed on save.", result.Message);
+            mockRepo.Verify();
         }
         #endregion
 
