@@ -41,7 +41,25 @@ namespace Library.API.Services
         {
             var collectionBeforePaging = _context.Authors
                 .OrderBy(a => a.FirstName)
-                .ThenBy(a => a.LastName);
+                .ThenBy(a => a.LastName)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(parameters.Genre))
+            {
+                var genreForWhereClause = parameters.Genre.Trim().ToUpperInvariant();
+                collectionBeforePaging = collectionBeforePaging
+                    .Where(a => a.Genre.ToUpperInvariant() == genreForWhereClause);
+            }
+
+            if (!string.IsNullOrEmpty(parameters.SearchQuery))
+            {
+                var searchQueryForWhereClause = parameters.SearchQuery.Trim().ToUpperInvariant();
+
+                collectionBeforePaging = collectionBeforePaging
+                    .Where(a => a.Genre.ToUpperInvariant().Contains(searchQueryForWhereClause)
+                    || a.FirstName.ToUpperInvariant().Contains(searchQueryForWhereClause)
+                    || a.LastName.ToUpperInvariant().Contains(searchQueryForWhereClause));
+            }
 
             return await PagedList<Author>.CreateAsync(
                 collectionBeforePaging, parameters.PageNumber, parameters.PageSize);

@@ -128,6 +128,8 @@ namespace Library.API.Controllers
                     return _linkGenerator.GetUriByRouteValues(HttpContext, "GetAuthors",
                         new
                         {
+                            searchQuery = parameters.SearchQuery,
+                            genre = parameters.Genre,
                             pageNumber = parameters.PageNumber - 1,
                             pageSize = parameters.PageSize
                         });
@@ -135,6 +137,8 @@ namespace Library.API.Controllers
                     return _linkGenerator.GetUriByRouteValues(HttpContext, "GetAuthors",
                         new
                         {
+                            searchQuery = parameters.SearchQuery,
+                            genre = parameters.Genre,
                             pageNumber = parameters.PageNumber + 1,
                             pageSize = parameters.PageSize
                         });
@@ -142,6 +146,8 @@ namespace Library.API.Controllers
                     return _linkGenerator.GetUriByRouteValues(HttpContext, "GetAuthors",
                         new
                         {
+                            searchQuery = parameters.SearchQuery,
+                            genre = parameters.Genre,
                             pageNumber = parameters.PageNumber,
                             pageSize = parameters.PageSize
                         });
