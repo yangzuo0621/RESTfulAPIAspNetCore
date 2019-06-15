@@ -7,6 +7,7 @@ using AutoMapper;
 using Library.API.Services;
 using Library.API.Models;
 using Library.API.Entities;
+using Library.API.Helpers;
 
 namespace Library.API.Controllers
 {
@@ -24,9 +25,10 @@ namespace Library.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthorsAsync()
+        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthorsAsync([FromQuery] AuthorsResourceParameters authorsResourceParameters)
         {
-            var authorsFromRepo = await _libraryRepository.GetAuthorsAsync();
+            var authorsFromRepo = await _libraryRepository.GetAuthorsAsync(authorsResourceParameters);
+
             var authors = _mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);
             return Ok(authors);
         }

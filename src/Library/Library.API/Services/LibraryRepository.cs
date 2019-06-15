@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Library.API.Entities;
 using Library.API.Contexts;
+using Library.API.Helpers;
 
 namespace Library.API.Services
 {
@@ -30,7 +31,20 @@ namespace Library.API.Services
 
         public async Task<IEnumerable<Author>> GetAuthorsAsync()
         {
-            return await _context.Authors.ToListAsync();
+            return await _context.Authors
+                .OrderBy(a => a.FirstName)
+                .ThenBy(a => a.LastName)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Author>> GetAuthorsAsync(AuthorsResourceParameters parameters)
+        {
+            return await _context.Authors
+                .OrderBy(a => a.FirstName)
+                .ThenBy(a => a.LastName)
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Author>> GetAuthorsAsync(IEnumerable<Guid> authorIds)

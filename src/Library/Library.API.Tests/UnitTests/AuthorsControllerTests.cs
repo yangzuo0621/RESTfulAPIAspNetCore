@@ -29,7 +29,7 @@ namespace Library.API.Tests.UnitTests
             var controller = new AuthorsController(mockRepo.Object, mapper);
 
             // Act
-            var result = await controller.GetAuthorsAsync();
+            var result = await controller.GetAuthorsAsync(new AuthorsResourceParameters());
 
             // Assert
             var actionResult = Assert.IsType<ActionResult<IEnumerable<AuthorDto>>>(result);

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Library.API.Entities;
+using Library.API.Helpers;
 
 namespace Library.API.Services
 {
@@ -11,6 +12,8 @@ namespace Library.API.Services
         Task<Author> GetAuthorAsync(Guid authorId);
 
         Task<IEnumerable<Author>> GetAuthorsAsync();
+
+        Task<IEnumerable<Author>> GetAuthorsAsync(AuthorsResourceParameters authorsResourceParameters);
 
         Task<IEnumerable<Author>> GetAuthorsAsync(IEnumerable<Guid> authorIds);
 
