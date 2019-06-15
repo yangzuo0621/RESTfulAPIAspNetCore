@@ -12,6 +12,7 @@ using Library.API.Services;
 using Library.API.Controllers;
 using Library.API.Profiles;
 using Library.API.Models;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 
 namespace Library.API.Tests.UnitTests
 {
@@ -486,6 +487,7 @@ namespace Library.API.Tests.UnitTests
             var authorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
             var bookId = Guid.Parse("1325360c-8253-473a-a20f-55c269c20407");
             var patchDoc = new JsonPatchDocument<BookForUpdateDto>();
+            var bookForUpdateDto = new BookForUpdateDto { Title = "A Book Title", Description = "Some Description" };
             var book = GetTestAuthorsData().FirstOrDefault(a => a.Id == authorId)
                 .Books.FirstOrDefault(b => b.Id == bookId);
             var mockRepo = new Mock<ILibraryRepository>();
@@ -500,7 +502,6 @@ namespace Library.API.Tests.UnitTests
                 .ReturnsAsync(true);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
             var controller = new BooksController(mockRepo.Object, mapper);
-            var bookForUpdateDto = new BookForUpdateDto();
 
             // Act 
             var result = await controller.PartiallyUpdateBookForAuthorAsync(authorId, bookId, patchDoc);
@@ -578,6 +579,8 @@ namespace Library.API.Tests.UnitTests
             var authorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
             var bookId = Guid.Parse("1325360c-8253-473a-a20f-55c269c20407");
             var patchDoc = new JsonPatchDocument<BookForUpdateDto>();
+            patchDoc.Operations.Add(new Operation<BookForUpdateDto>("replace", "/title", null, "Title Updated"));
+            var bookForUpdateDto = new BookForUpdateDto { Title = "A Book Title", Description = "Some Description" };
             var book = GetTestAuthorsData().FirstOrDefault(a => a.Id == authorId)
                 .Books.FirstOrDefault(b => b.Id == bookId);
             var mockRepo = new Mock<ILibraryRepository>();
@@ -592,7 +595,6 @@ namespace Library.API.Tests.UnitTests
                 .ReturnsAsync(false);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
             var controller = new BooksController(mockRepo.Object, mapper);
-            var bookForUpdateDto = new BookForUpdateDto();
 
             // Act 
             var result = await Assert.ThrowsAsync<Exception>(() => controller.PartiallyUpdateBookForAuthorAsync(authorId, bookId, patchDoc));
