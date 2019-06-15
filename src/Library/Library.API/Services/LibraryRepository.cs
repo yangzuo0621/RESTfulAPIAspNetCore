@@ -37,14 +37,14 @@ namespace Library.API.Services
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Author>> GetAuthorsAsync(AuthorsResourceParameters parameters)
+        public async Task<PagedList<Author>> GetAuthorsAsync(AuthorsResourceParameters parameters)
         {
-            return await _context.Authors
+            var collectionBeforePaging = _context.Authors
                 .OrderBy(a => a.FirstName)
-                .ThenBy(a => a.LastName)
-                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
-                .Take(parameters.PageSize)
-                .ToListAsync();
+                .ThenBy(a => a.LastName);
+
+            return await PagedList<Author>.CreateAsync(
+                collectionBeforePaging, parameters.PageNumber, parameters.PageSize);
         }
 
         public async Task<IEnumerable<Author>> GetAuthorsAsync(IEnumerable<Guid> authorIds)

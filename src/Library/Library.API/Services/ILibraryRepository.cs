@@ -13,7 +13,7 @@ namespace Library.API.Services
 
         Task<IEnumerable<Author>> GetAuthorsAsync();
 
-        Task<IEnumerable<Author>> GetAuthorsAsync(AuthorsResourceParameters authorsResourceParameters);
+        Task<PagedList<Author>> GetAuthorsAsync(AuthorsResourceParameters authorsResourceParameters);
 
         Task<IEnumerable<Author>> GetAuthorsAsync(IEnumerable<Guid> authorIds);
 

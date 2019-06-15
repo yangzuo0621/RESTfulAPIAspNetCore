@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,6 +73,13 @@ namespace Library.API
             //    options.UseInMemoryDatabase("InMemoryDb"));
 
             services.AddScoped<ILibraryRepository, LibraryRepository>();
+
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper, UrlHelper>(options =>
+            {
+                var actionContext = options.GetService<IActionContextAccessor>().ActionContext;
+                return new UrlHelper(actionContext);
+            });
 
             services.AddAutoMapper(typeof(Startup).Assembly);
         }

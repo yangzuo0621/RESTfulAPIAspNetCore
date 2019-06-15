@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using AutoMapper;
 using Library.API.Services;
 using Library.API.Models;
@@ -16,18 +17,38 @@ namespace Library.API.Controllers
     public class AuthorsController : ControllerBase
     {
         private readonly ILibraryRepository _libraryRepository;
+        private readonly IUrlHelper _urlHelper;
         private readonly IMapper _mapper;
 
-        public AuthorsController(ILibraryRepository libraryRepository, IMapper mapper)
+        public AuthorsController(ILibraryRepository libraryRepository, IUrlHelper urlHelper, IMapper mapper)
         {
             _libraryRepository = libraryRepository;
+            _urlHelper = urlHelper;
             _mapper = mapper;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthorsAsync([FromQuery] AuthorsResourceParameters authorsResourceParameters)
+        [HttpGet(Name = "GetAuthors")]
+        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthorsAsync([FromQuery] AuthorsResourceParameters parameters)
         {
-            var authorsFromRepo = await _libraryRepository.GetAuthorsAsync(authorsResourceParameters);
+            var authorsFromRepo = await _libraryRepository.GetAuthorsAsync(parameters);
+
+            var previousPageLink = authorsFromRepo.HasPrevious ?
+                CreateAuthorsResourceUri(parameters, ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = authorsFromRepo.HasNext ?
+                CreateAuthorsResourceUri(parameters, ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = authorsFromRepo.TotalCount,
+                pageSize = authorsFromRepo.PageSize,
+                currentPage = authorsFromRepo.CurrentPage,
+                totalPages = authorsFromRepo.TotalPages,
+                previousPageLink = previousPageLink,
+                nextPageLink = nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var authors = _mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);
             return Ok(authors);
@@ -96,6 +117,34 @@ namespace Library.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateAuthorsResourceUri(AuthorsResourceParameters parameters, ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetAuthors",
+                        new
+                        {
+                            pageNumber = parameters.PageNumber - 1,
+                            pageSize = parameters.PageSize
+                        });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetAuthors",
+                        new
+                        {
+                            pageNumber = parameters.PageNumber + 1,
+                            pageSize = parameters.PageSize
+                        });
+                default:
+                    return _urlHelper.Link("GetAuthors",
+                        new
+                        {
+                            pageNumber = parameters.PageNumber,
+                            pageSize = parameters.PageSize
+                        });
+            }
         }
     }
 }
