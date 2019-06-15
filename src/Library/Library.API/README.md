@@ -13,3 +13,10 @@ The [ApiController] attribute can be applied to a controller class to enable API
 To configure the behavior of the ApiController attribute, refer to [link](https://docs.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-2.2#problem-details-for-error-status-codes).
 
 [FluentValidation](https://github.com/JeremySkinner/FluentValidation) Tool can be used to build custom validation rules.
+
+
+### `IUrlHelper` and `LinkGenerator`
+
+`LinkGenerator` is a new service that handles generating links. This is different from the `UrlHelper` that has been used in ASP.NET MVC for a long time in that it is just an injectable service, not depending on being called in a controller or other reference to the request.
+
+`ControllerBase.Url` is an instance of `IUrlHelper`.

@@ -74,13 +74,6 @@ namespace Library.API
 
             services.AddScoped<ILibraryRepository, LibraryRepository>();
 
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddScoped<IUrlHelper, UrlHelper>(options =>
-            {
-                var actionContext = options.GetService<IActionContextAccessor>().ActionContext;
-                return new UrlHelper(actionContext);
-            });
-
             services.AddAutoMapper(typeof(Startup).Assembly);
         }
 

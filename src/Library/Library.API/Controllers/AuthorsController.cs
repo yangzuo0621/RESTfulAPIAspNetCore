@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 using AutoMapper;
 using Library.API.Services;
@@ -17,13 +18,13 @@ namespace Library.API.Controllers
     public class AuthorsController : ControllerBase
     {
         private readonly ILibraryRepository _libraryRepository;
-        private readonly IUrlHelper _urlHelper;
+        private readonly LinkGenerator _linkGenerator;
         private readonly IMapper _mapper;
 
-        public AuthorsController(ILibraryRepository libraryRepository, IUrlHelper urlHelper, IMapper mapper)
+        public AuthorsController(ILibraryRepository libraryRepository, LinkGenerator linkGenerator, IMapper mapper)
         {
             _libraryRepository = libraryRepository;
-            _urlHelper = urlHelper;
+            _linkGenerator = linkGenerator;
             _mapper = mapper;
         }
 
@@ -124,21 +125,21 @@ namespace Library.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetAuthors",
+                    return _linkGenerator.GetUriByRouteValues(HttpContext, "GetAuthors",
                         new
                         {
                             pageNumber = parameters.PageNumber - 1,
                             pageSize = parameters.PageSize
                         });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetAuthors",
+                    return _linkGenerator.GetUriByRouteValues(HttpContext, "GetAuthors",
                         new
                         {
                             pageNumber = parameters.PageNumber + 1,
                             pageSize = parameters.PageSize
                         });
                 default:
-                    return _urlHelper.Link("GetAuthors",
+                    return _linkGenerator.GetUriByRouteValues(HttpContext, "GetAuthors",
                         new
                         {
                             pageNumber = parameters.PageNumber,
@@ -146,5 +147,33 @@ namespace Library.API.Controllers
                         });
             }
         }
+
+        //private string CreateAuthorsResourceUri(AuthorsResourceParameters parameters, ResourceUriType type)
+        //{
+        //    switch (type)
+        //    {
+        //        case ResourceUriType.PreviousPage:
+        //            return Url.Link("GetAuthors",
+        //                new
+        //                {
+        //                    pageNumber = parameters.PageNumber - 1,
+        //                    pageSize = parameters.PageSize
+        //                });
+        //        case ResourceUriType.NextPage:
+        //            return Url.Link("GetAuthors",
+        //                new
+        //                {
+        //                    pageNumber = parameters.PageNumber + 1,
+        //                    pageSize = parameters.PageSize
+        //                });
+        //        default:
+        //            return Url.Link("GetAuthors",
+        //                new
+        //                {
+        //                    pageNumber = parameters.PageNumber,
+        //                    pageSize = parameters.PageSize
+        //                });
+        //    }
+        //}
     }
 }
