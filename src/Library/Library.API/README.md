@@ -30,3 +30,14 @@ ASP.NET Core provide a "fake" HttpContext named `DefaultHttpContext`.
     var controller = new HomeController();
     controller.ControllerContext = new ControllerContext();
     controller.ControllerContext.HttpContext = new DefaultHttpContext();
+
+### `TryValidateModel` throws exception when unit tested
+
+    var objectValidator = new Mock<IObjectModelValidator>();
+    objectValidator.Setup(o => o.Validate(It.IsAny<ActionContext>(), 
+        It.IsAny<ValidationStateDictionary>(), 
+        It.IsAny<string>(), 
+        It.IsAny<Object>()));
+    controller.ObjectValidator = objectValidator.Object;
+
+[Stackoverflow](https://stackoverflow.com/questions/51773391/tryvalidatemodel-in-asp-net-core-throws-null-reference-exception-while-performin)

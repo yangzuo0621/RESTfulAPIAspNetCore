@@ -13,6 +13,7 @@ using Library.API.Controllers;
 using Library.API.Profiles;
 using Library.API.Models;
 using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Library.API.Tests.UnitTests
 {
@@ -503,6 +504,13 @@ namespace Library.API.Tests.UnitTests
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
             var controller = new BooksController(mockRepo.Object, mapper);
 
+            var objectValidator = new Mock<IObjectModelValidator>();
+            objectValidator.Setup(o => o.Validate(It.IsAny<ActionContext>(),
+                                              It.IsAny<ValidationStateDictionary>(),
+                                              It.IsAny<string>(),
+                                              It.IsAny<Object>()));
+            controller.ObjectValidator = objectValidator.Object;
+
             // Act 
             var result = await controller.PartiallyUpdateBookForAuthorAsync(authorId, bookId, patchDoc);
 
@@ -595,6 +603,13 @@ namespace Library.API.Tests.UnitTests
                 .ReturnsAsync(false);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile())).CreateMapper();
             var controller = new BooksController(mockRepo.Object, mapper);
+
+            var objectValidator = new Mock<IObjectModelValidator>();
+            objectValidator.Setup(o => o.Validate(It.IsAny<ActionContext>(),
+                                              It.IsAny<ValidationStateDictionary>(),
+                                              It.IsAny<string>(),
+                                              It.IsAny<Object>()));
+            controller.ObjectValidator = objectValidator.Object;
 
             // Act 
             var result = await Assert.ThrowsAsync<Exception>(() => controller.PartiallyUpdateBookForAuthorAsync(authorId, bookId, patchDoc));
