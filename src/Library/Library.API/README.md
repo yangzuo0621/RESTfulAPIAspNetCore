@@ -20,3 +20,13 @@ To configure the behavior of the ApiController attribute, refer to [link](https:
 `LinkGenerator` is a new service that handles generating links. This is different from the `UrlHelper` that has been used in ASP.NET MVC for a long time in that it is just an injectable service, not depending on being called in a controller or other reference to the request.
 
 `ControllerBase.Url` is an instance of `IUrlHelper`.
+
+## Tests
+
+### How to mock an `HttpContext`
+
+ASP.NET Core provide a "fake" HttpContext named `DefaultHttpContext`.
+
+    var controller = new HomeController();
+    controller.ControllerContext = new ControllerContext();
+    controller.ControllerContext.HttpContext = new DefaultHttpContext();

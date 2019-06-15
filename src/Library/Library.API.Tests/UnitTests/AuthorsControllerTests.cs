@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Http;
 using Xunit;
 using Moq;
 using AutoMapper;
@@ -22,14 +24,24 @@ namespace Library.API.Tests.UnitTests
         public async Task GetAuthorsAsync_Test()
         {
             // Arrange
+            var parameters = new AuthorsResourceParameters();
+            var authors = GetTestAuthorsData();
+            authors.OrderBy(a => a.FirstName).ThenBy(a => a.LastName);
+            var pagedAuthors = PagedList<Author>.Create(authors.AsQueryable(), parameters.PageNumber, parameters.PageSize);
+            
             var mockRepo = new Mock<ILibraryRepository>();
-            mockRepo.Setup(repo => repo.GetAuthorsAsync())
-                .ReturnsAsync(GetTestAuthorsData());
+            var mockLinkGenerator = new Mock<LinkGenerator>();
+            mockRepo.Setup(repo => repo.GetAuthorsAsync(parameters))
+                .ReturnsAsync(pagedAuthors);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
+
+            /// How to mock an HttpContext, ASP.NET Core provide a "fake" HttpContext named DefaultHttpContext.
+            controller.ControllerContext = new ControllerContext();
+            controller.ControllerContext.HttpContext = new DefaultHttpContext();
 
             // Act
-            var result = await controller.GetAuthorsAsync(new AuthorsResourceParameters());
+            var result = await controller.GetAuthorsAsync(parameters);
 
             // Assert
             var actionResult = Assert.IsType<ActionResult<IEnumerable<AuthorDto>>>(result);
@@ -44,11 +56,12 @@ namespace Library.API.Tests.UnitTests
         {
             // Arrange
             var mockRepo = new Mock<ILibraryRepository>();
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var testAuthorId = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
             mockRepo.Setup(repo => repo.GetAuthorAsync(testAuthorId))
                 .ReturnsAsync(GetTestAuthorsData().FirstOrDefault(a => a.Id == testAuthorId));
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await controller.GetAuthorAsync(testAuthorId);
@@ -67,11 +80,12 @@ namespace Library.API.Tests.UnitTests
         {
             // Arrange
             var mockRepo = new Mock<ILibraryRepository>();
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var testAuthorId = Guid.Parse("25320c5e-f58a-5bbf-b63a-8ee07a840bdf");
             mockRepo.Setup(repo => repo.GetAuthorAsync(testAuthorId))
                 .ReturnsAsync((Author)null);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await controller.GetAuthorAsync(testAuthorId);
@@ -106,13 +120,14 @@ namespace Library.API.Tests.UnitTests
             var newAuthor = mapper.Map<Author>(authorForCreationDto);
             newAuthor.Id = id;
 
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.SaveChangesAsync())
                 .Returns(Task.FromResult(true));
             mockRepo.Setup(repo => repo.UpdateAuthorAsync(newAuthor))
                 .Returns(Task.FromResult(newAuthor));
 
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await controller.CreateAuthorAsync(authorForCreationDto);
@@ -134,13 +149,14 @@ namespace Library.API.Tests.UnitTests
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
             var authorForCreationDto = new AuthorForCreationDto();
             var author = mapper.Map<Author>(authorForCreationDto);
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.SaveChangesAsync())
                 .ReturnsAsync(false);
             mockRepo.Setup(repo => repo.AddAuthorAsync(author))
                 .Returns(Task.CompletedTask);
 
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await Assert.ThrowsAsync<Exception>(() => controller.CreateAuthorAsync(authorForCreationDto));
@@ -155,8 +171,9 @@ namespace Library.API.Tests.UnitTests
         {
             // Arrange
             var mockRepo = new Mock<ILibraryRepository>();
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await controller.CreateAuthorAsync((AuthorForCreationDto)null);
@@ -173,11 +190,12 @@ namespace Library.API.Tests.UnitTests
         {
             // Arrange
             var fakeId = Guid.NewGuid();
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.AuthorExistsAsync(fakeId))
                 .ReturnsAsync(false);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await controller.BlockAuthorCreationAsync(fakeId);
@@ -191,11 +209,12 @@ namespace Library.API.Tests.UnitTests
         {
             // Arrange
             var fakeId = Guid.NewGuid();
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.AuthorExistsAsync(fakeId))
                 .ReturnsAsync(true);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await controller.BlockAuthorCreationAsync(fakeId);
@@ -212,11 +231,12 @@ namespace Library.API.Tests.UnitTests
         {
             // Arrange
             var fakeId = Guid.NewGuid();
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.GetAuthorAsync(fakeId))
                 .ReturnsAsync((Author) null);
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await controller.DeleteAuthorAsync(fakeId);
@@ -231,6 +251,7 @@ namespace Library.API.Tests.UnitTests
             // Arrange
             var id = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
             var author = GetTestAuthorsData().FirstOrDefault(a => a.Id == id);
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.GetAuthorAsync(id))
                 .ReturnsAsync(author);
@@ -239,7 +260,7 @@ namespace Library.API.Tests.UnitTests
             mockRepo.Setup(repo => repo.SaveChangesAsync())
                 .Returns(Task.FromResult(false));
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await Assert.ThrowsAsync<Exception>(() => controller.DeleteAuthorAsync(id));
@@ -255,6 +276,7 @@ namespace Library.API.Tests.UnitTests
             // Arrange
             var id = Guid.Parse("a1da1d8e-1988-4634-b538-a01709477b77");
             var author = GetTestAuthorsData().FirstOrDefault(a => a.Id == id);
+            var mockLinkGenerator = new Mock<LinkGenerator>();
             var mockRepo = new Mock<ILibraryRepository>();
             mockRepo.Setup(repo => repo.GetAuthorAsync(id))
                 .ReturnsAsync(author);
@@ -263,7 +285,7 @@ namespace Library.API.Tests.UnitTests
             mockRepo.Setup(repo => repo.SaveChangesAsync())
                 .Returns(Task.FromResult(true));
             var mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AuthorProfile())).CreateMapper();
-            var controller = new AuthorsController(mockRepo.Object, mapper);
+            var controller = new AuthorsController(mockRepo.Object, mockLinkGenerator.Object, mapper);
 
             // Act
             var result = await controller.DeleteAuthorAsync(id);
