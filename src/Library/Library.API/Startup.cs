@@ -56,6 +56,11 @@ namespace Library.API
                     jsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.marvin.hateoas+json");
                 }
 
+                var xmlDataContractSerializerInputFormatter = new XmlDataContractSerializerInputFormatter();
+                xmlDataContractSerializerInputFormatter.SupportedMediaTypes
+                    .Add("application/vnd.marvin.authorwithdateofdeath.full+xml");
+                options.InputFormatters.Add(xmlDataContractSerializerInputFormatter);
+
                 var jsonInputFormatter = options.InputFormatters
                     .OfType<JsonInputFormatter>().FirstOrDefault();
 

@@ -172,7 +172,12 @@ namespace Library.API.Controllers
         }
 
         [HttpPost(Name = "CreateAuthorWithDateOfDeath")]
-        [RequestHeaderMatchesMediaType("Content-Type", new[] { "application/vnd.marvin.authorwithdateofdeath.full+json" })]
+        [RequestHeaderMatchesMediaType("Content-Type", 
+            new[] {
+                "application/vnd.marvin.authorwithdateofdeath.full+json",
+                "application/vnd.marvin.authorwithdateofdeath.full+xml",
+            })]
+        // [RequestHeaderMatchesMediaType("Accept", "...")]
         public async Task<ActionResult> CreateAuthorWithDateOfDeathAsync(
             [FromBody] AuthorForCreationWithDateOfDeathDto author)
         {
