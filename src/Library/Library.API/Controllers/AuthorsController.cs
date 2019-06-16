@@ -141,7 +141,7 @@ namespace Library.API.Controllers
             return Ok(linkedResourceToReturn);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateAuthor")]
         public async Task<ActionResult> CreateAuthorAsync([FromBody] AuthorForCreationDto author)
         {
             if (author == null)
