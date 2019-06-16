@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Serialization;
 
 namespace Library.API
 {
@@ -65,6 +66,10 @@ namespace Library.API
             //    options.ClientErrorMapping[404].Link =
             //        "https://httpstatuses.com/404";
             //})
+            .AddJsonOptions(options =>
+            {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddDbContext<LibraryContext>(options =>
@@ -75,6 +80,7 @@ namespace Library.API
             services.AddScoped<ILibraryRepository, LibraryRepository>();
 
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+            services.AddTransient<ITypeHelperService, TypeHelperService>();
 
             services.AddAutoMapper(typeof(Startup).Assembly);
         }
