@@ -42,9 +42,3 @@ ASP.NET Core provide a "fake" HttpContext named `DefaultHttpContext`.
 
 [Stackoverflow](https://stackoverflow.com/questions/51773391/tryvalidatemodel-in-asp-net-core-throws-null-reference-exception-while-performin)
 
-
-## Optional: Data Shape
-
-Allow consumer to select which fields are return by API. It usually works with HATEOAS. It may break architecture design.
-
-## HATEOAS

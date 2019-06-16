@@ -39,3 +39,26 @@ the Design of Network-based Software Architectures](https://www.ics.uci.edu/~fie
 ## Status Codes
 
 https://www.restapitutorial.com/httpstatuscodes.html
+
+
+## Optional: Data Shape
+
+Allow consumer to select which fields are return by API. It usually works with HATEOAS. It may break architecture design.
+
+## HATEOAS
+
+## Media Types
+
+## Other Approaches and Options to RESTFul Api
+
++ HAL (Hypertext Application Language)
+    - https://tools.ietf.org/html/draft-kelly-json-hal-08
++ SIREN (Structured Interface for Representing Entities)
+    - https://github.com/kevinswiber/siren
+    - https://github.com/yury-sannikov/NHateoas
++ JSON-LD (linked data format)
+    - https://json-ld.org/
++ JSO-API
+    - http://jsonapi.org/
++ OData
+    - https://www.odata.org/
