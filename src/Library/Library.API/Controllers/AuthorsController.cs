@@ -20,17 +20,28 @@ namespace Library.API.Controllers
         private readonly ILibraryRepository _libraryRepository;
         private readonly LinkGenerator _linkGenerator;
         private readonly IMapper _mapper;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public AuthorsController(ILibraryRepository libraryRepository, LinkGenerator linkGenerator, IMapper mapper)
+        public AuthorsController(
+            ILibraryRepository libraryRepository, 
+            LinkGenerator linkGenerator, 
+            IMapper mapper, 
+            IPropertyMappingService propertyMappingService)
         {
             _libraryRepository = libraryRepository;
             _linkGenerator = linkGenerator;
             _mapper = mapper;
+            _propertyMappingService = propertyMappingService;
         }
 
         [HttpGet(Name = "GetAuthors")]
         public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthorsAsync([FromQuery] AuthorsResourceParameters parameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<AuthorDto, Author>(parameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var authorsFromRepo = await _libraryRepository.GetAuthorsAsync(parameters);
 
             var previousPageLink = authorsFromRepo.HasPrevious ?
@@ -128,6 +139,7 @@ namespace Library.API.Controllers
                     return _linkGenerator.GetUriByRouteValues(HttpContext, "GetAuthors",
                         new
                         {
+                            orderBy = parameters.OrderBy,
                             searchQuery = parameters.SearchQuery,
                             genre = parameters.Genre,
                             pageNumber = parameters.PageNumber - 1,
@@ -137,6 +149,7 @@ namespace Library.API.Controllers
                     return _linkGenerator.GetUriByRouteValues(HttpContext, "GetAuthors",
                         new
                         {
+                            orderBy = parameters.OrderBy,
                             searchQuery = parameters.SearchQuery,
                             genre = parameters.Genre,
                             pageNumber = parameters.PageNumber + 1,
@@ -146,6 +159,7 @@ namespace Library.API.Controllers
                     return _linkGenerator.GetUriByRouteValues(HttpContext, "GetAuthors",
                         new
                         {
+                            orderBy = parameters.OrderBy,
                             searchQuery = parameters.SearchQuery,
                             genre = parameters.Genre,
                             pageNumber = parameters.PageNumber,

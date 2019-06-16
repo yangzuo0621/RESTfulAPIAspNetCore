@@ -6,16 +6,19 @@ using Microsoft.EntityFrameworkCore;
 using Library.API.Entities;
 using Library.API.Contexts;
 using Library.API.Helpers;
+using Library.API.Models;
 
 namespace Library.API.Services
 {
     public class LibraryRepository : ILibraryRepository, IDisposable
     {
         private LibraryContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public LibraryRepository(LibraryContext context)
+        public LibraryRepository(LibraryContext context, IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
         #region Author
@@ -39,10 +42,13 @@ namespace Library.API.Services
 
         public async Task<PagedList<Author>> GetAuthorsAsync(AuthorsResourceParameters parameters)
         {
-            var collectionBeforePaging = _context.Authors
-                .OrderBy(a => a.FirstName)
-                .ThenBy(a => a.LastName)
-                .AsQueryable();
+            //var collectionBeforePaging = _context.Authors
+            //    .OrderBy(a => a.FirstName)
+            //    .ThenBy(a => a.LastName)
+            //    .AsQueryable();
+
+            var collectionBeforePaging = _context.Authors.ApplySort(
+                parameters.OrderBy, _propertyMappingService.GetPropertyMapping<AuthorDto, Author>());
 
             if (!string.IsNullOrEmpty(parameters.Genre))
             {
