@@ -64,7 +64,7 @@ namespace Library.API.Controllers
             return Ok(CreateLinksForBook(bookForAuthor));
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateBookForAuthor")]
         public async Task<ActionResult<BookDto>> CreateBookForAuthorAsync(Guid authorId, [FromBody] BookForCreationDto book)
         {
             if (book == null)
