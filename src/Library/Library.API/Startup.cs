@@ -74,6 +74,8 @@ namespace Library.API
 
             services.AddScoped<ILibraryRepository, LibraryRepository>();
 
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+
             services.AddAutoMapper(typeof(Startup).Assembly);
         }
 
