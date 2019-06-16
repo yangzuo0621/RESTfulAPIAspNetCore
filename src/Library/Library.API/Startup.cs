@@ -55,6 +55,15 @@ namespace Library.API
 
                     jsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.marvin.hateoas+json");
                 }
+
+                var jsonInputFormatter = options.InputFormatters
+                    .OfType<JsonInputFormatter>().FirstOrDefault();
+
+                if (jsonInputFormatter != null)
+                {
+                    jsonInputFormatter.SupportedMediaTypes.Add("application/vnd.marvin.author.full+json");
+                    jsonInputFormatter.SupportedMediaTypes.Add("application/vnd.marvin.authorwithdateofdeath.full+json");
+                }
             })
             .AddXmlDataContractSerializerFormatters()
             // Uncomment this code and use ConfigureApiBehaviorOptions to change the behavior of [ApiController] attribute.

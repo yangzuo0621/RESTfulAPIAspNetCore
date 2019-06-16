@@ -142,7 +142,39 @@ namespace Library.API.Controllers
         }
 
         [HttpPost(Name = "CreateAuthor")]
+        [RequestHeaderMatchesMediaType("Content-Type", new[] { "application/vnd.marvin.author.full+json" })]
         public async Task<ActionResult> CreateAuthorAsync([FromBody] AuthorForCreationDto author)
+        {
+            if (author == null)
+            {
+                return BadRequest();
+            }
+
+            var authorEntity = _mapper.Map<Author>(author);
+
+            await _libraryRepository.AddAuthorAsync(authorEntity);
+
+            if (!await _libraryRepository.SaveChangesAsync())
+            {
+                throw new Exception("Creating an author failed on save.");
+                // return StatusCode(500, "A problem happened with handling your request.");
+            }
+
+            var authorToReturn = _mapper.Map<AuthorDto>(authorEntity);
+
+            var links = CreateLinksForAuthor(authorToReturn.Id, null);
+
+            var linkedResourceToReturn = authorToReturn.ShapeData(null) as IDictionary<string, object>;
+
+            linkedResourceToReturn.Add("links", links);
+
+            return CreatedAtRoute("GetAuthor", new { authorId = linkedResourceToReturn["Id"] }, linkedResourceToReturn);
+        }
+
+        [HttpPost(Name = "CreateAuthorWithDateOfDeath")]
+        [RequestHeaderMatchesMediaType("Content-Type", new[] { "application/vnd.marvin.authorwithdateofdeath.full+json" })]
+        public async Task<ActionResult> CreateAuthorWithDateOfDeathAsync(
+            [FromBody] AuthorForCreationWithDateOfDeathDto author)
         {
             if (author == null)
             {
