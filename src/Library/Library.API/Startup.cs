@@ -52,6 +52,8 @@ namespace Library.API
                     {
                         jsonOutputFormatter.SupportedMediaTypes.Remove("text/json");
                     }
+
+                    jsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.marvin.hateoas+json");
                 }
             })
             .AddXmlDataContractSerializerFormatters()
