@@ -62,3 +62,81 @@ Allow consumer to select which fields are return by API. It usually works with H
     - http://jsonapi.org/
 + OData
     - https://www.odata.org/
+
+
+## Caching and Concurrency
+
+### HTTP Caching
++ [RFC 2616](https://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html)
++ [RFC 7234](https://tools.ietf.org/html/rfc7234)
+
+### Expiration Model
+
+Expires header
+
++ Expires: Sat, 14 Jan 2017 15:23:40 GMT
++ clocks must be synchronised
++ Offers little control
+
+Cache-Control header
+
++ Cache-Control: public, max-age=60
++ Preferred header for expiration
++ [Directives](https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html)
+
+    Response (server side)
+    - Freshness: max-age, s-maxage
+    - Cache type: public, private
+    - Validation: no-cache, must-revalidate, proxy-revalidate
+    - Other: no-store, no-transform
+
+    Request (client side)
+    - Freshness: max-age, min-fresh, max-stale
+    - Validation: no-cache
+    - Other: no-store, no-transform, only-if-cached
+
+Cache Stores
++ Private caches
+    - [angular-http-etag](https://github.com/shaungrady/angular-http-etag)
+    - [Marvin.HttpCache](https://www.nuget.org/packages/Marvin.HttpCache/)
+    
+        PCL, no .NET Core
+
++ Private and shared caches
+    - [CacheCow.Client](https://www.nuget.org/packages/CacheCow.Client/)
+
++ Shared caches (.NET Core)
+    - ASP.NET Core ResponseCaching middleware
+
+        ASP.NET Web API, full .NET framework
+
+
+### Validation Model
+
+Strong validators
++ Change if the body or headers of a response change
++ ETag (Entity Tag) response header
++ ETag: "123456789"
++ Can be used in any context (equiality si guaranteed)
+
+Weak validators
++ Don't always change when the response changes (eg: only on significant changes)
++ Last-Modified: Sat, 14 Jan 2017 15:23:40 GMT
++ ETag: "w/123456789"
++ Equivalence, but not equality
+
+HTTP standard advice to send both ETag and Last-Modified headers if possible.
+
+### Concurrency Strategies
+
++ Pessimistic concurrency
+
+    - Resource is locked
+    - while it's locked, it cannot be modified by another client
+    - This is not possible in REST
+
++ Optimistic concurrency
+
+    - Token is returned together with the resource
+    - The update can happen as long as the token is still valid
+    - ETags are used as validation tokens
