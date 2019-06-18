@@ -8,11 +8,11 @@ This project comes from https://github.com/KevinDockx/DocumentingAspNetCoreApisW
 | ----------- | --------------- | ---------- | ---------------- |
 | GET         | -               | /api/authors | author collection |
 | POST        | single author   | /api/authors | single author  |
-| PUT         | single author   | api/authors/{authorId} | single author or empty |
+| PUT         | single author   | /api/authors/{authorId} | single author or empty |
 | PATCH       | JsonPatchDocument on author | /api/authors/{authorId} | single author or empty |
-| DELETE      | -               | api/authors/{authorId} | - |
-| HEAD        | -               | api/authors/{authorId} | - |
-| OPTIONS     | -               | api/...                | - |
+| DELETE      | -               | /api/authors/{authorId} | - |
+| HEAD        | -               | /api/authors/{authorId} | - |
+| OPTIONS     | -               | /api/...                | - |
 
 + HTTP `PUT` method is often used to fully update resource.
 
@@ -140,3 +140,7 @@ HTTP standard advice to send both ETag and Last-Modified headers if possible.
     - Token is returned together with the resource
     - The update can happen as long as the token is still valid
     - ETags are used as validation tokens
+
+## Load testing tools
+
++ [West Wind WebSurge](https://websurge.west-wind.com/)
