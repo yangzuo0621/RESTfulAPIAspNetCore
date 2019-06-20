@@ -117,7 +117,7 @@ Strong validators
 + Change if the body or headers of a response change
 + ETag (Entity Tag) response header
 + ETag: "123456789"
-+ Can be used in any context (equiality si guaranteed)
++ Can be used in any context (equiality is guaranteed)
 
 Weak validators
 + Don't always change when the response changes (eg: only on significant changes)
